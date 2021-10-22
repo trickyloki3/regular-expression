@@ -6,6 +6,8 @@
 
 #include "lex.h"
 
+#include "nfa.c"
+
 int lex_create(struct lex * lex, int node_size, int edge_size, int span_size) {
     lex->node = malloc(node_size * sizeof(*lex->node));
     if(lex->node == NULL)

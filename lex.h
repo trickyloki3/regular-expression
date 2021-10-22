@@ -13,8 +13,8 @@ struct edge {
 };
 
 struct span {
-    int min;
-    int max;
+    int a;
+    int b;
     int node;
     int next;
 };
