@@ -1,3 +1,16 @@
+enum {
+    NUL,
+    VAR,
+    EXP,
+    FIN,
+    X28,
+    X29,
+    X2A,
+    X2B,
+    X3F,
+    X7C
+};
+
 static int node_push(struct lex *, int *);
 static int edge_push(struct lex *, int, int);
 static int span_push(struct lex *, int, int, int, int);
@@ -6,6 +19,7 @@ static void node_cat(struct lex *, int, int);
 static void node_sub(struct lex *, int, int);
 
 static int token_parse(struct lex *, char *);
+static int token_shift(struct lex *, int, int, int);
 
 static int node_push(struct lex * lex, int * node) {
     int i;
@@ -99,21 +113,33 @@ static int token_parse(struct lex * lex, char * s) {
 loop:
     switch(*s) {
         case '(':
+            if(token_shift(lex, 0, 0, X28))
+                return panic("invalid syntax");
             s++;
             goto loop;
         case ')':
+            if(token_shift(lex, 0, 0, X29))
+                return panic("invalid syntax");
             s++;
             goto loop;
         case '*':
+            if(token_shift(lex, 0, 0, X2A))
+                return panic("invalid syntax");
             s++;
             goto loop;
         case '+':
+            if(token_shift(lex, 0, 0, X2B))
+                return panic("invalid syntax");
             s++;
             goto loop;
         case '?':
+            if(token_shift(lex, 0, 0, X3F))
+                return panic("invalid syntax");
             s++;
             goto loop;
         case '|':
+            if(token_shift(lex, 0, 0, X7C))
+                return panic("invalid syntax");
             s++;
             goto loop;
         case '[':
@@ -174,6 +200,9 @@ loop:
             if(*s != ']')
                 return panic("invalid character");
 
+            if(token_shift(lex, 0, 0, VAR))
+                return panic("invalid syntax");
+
             s++;
             goto loop;
     }
@@ -181,5 +210,12 @@ loop:
     if(*s != 0)
         return panic("invalid character");
 
+    if(token_shift(lex, 0, 0, NUL))
+        return panic("invalid syntax");
+
+    return 0;
+}
+
+static int token_shift(struct lex * lex, int head, int tail, int token) {
     return 0;
 }
