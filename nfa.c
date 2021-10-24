@@ -110,6 +110,9 @@ static int token_parse(struct lex * lex, char * s) {
     int a;
     int b;
 
+    int head;
+    int tail;
+
 loop:
     switch(*s) {
         case '(':
@@ -143,7 +146,8 @@ loop:
             s++;
             goto loop;
         case '[':
-
+            if(node_push(lex, &head) || node_push(lex, &tail))
+                return panic("failed to push node");
     span:
             a = 0;
             b = 0;
@@ -194,13 +198,16 @@ loop:
                 b = a;
             }
 
+            if(span_push(lex, a, b, head, tail))
+                return panic("failed to push span");
+
             if(*s == ',')
                 goto span;
 
             if(*s != ']')
                 return panic("invalid character");
 
-            if(token_shift(lex, 0, 0, VAR))
+            if(token_shift(lex, head, tail, VAR))
                 return panic("invalid syntax");
 
             s++;
