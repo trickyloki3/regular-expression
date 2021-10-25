@@ -19,6 +19,12 @@ struct span {
     int next;
 };
 
+struct token {
+    int head;
+    int tail;
+    int state;
+};
+
 struct lex {
     struct node * node;
     int node_part;
@@ -32,9 +38,11 @@ struct lex {
     int span_part;
     int span_next;
     int span_size;
+    struct token * token;
+    struct token * bound;
 };
 
-int lex_create(struct lex *, int, int, int);
+int lex_create(struct lex *, int, int, int, int);
 void lex_delete(struct lex *);
 
 #endif
