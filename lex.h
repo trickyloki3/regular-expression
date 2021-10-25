@@ -40,6 +40,7 @@ struct lex {
     int span_size;
     struct token * token;
     struct token * bound;
+    struct token * stack;
 };
 
 int lex_create(struct lex *, int, int, int, int);

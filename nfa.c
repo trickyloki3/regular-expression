@@ -21,6 +21,8 @@ static void node_sub(struct lex *, int, int);
 static int token_parse(struct lex *, char *);
 static int token_shift(struct lex *, int, int, int);
 
+static int nfa_construct(struct lex *, char *, int);
+
 static int node_push(struct lex * lex, int * node) {
     int i;
 
@@ -224,5 +226,18 @@ loop:
 }
 
 static int token_shift(struct lex * lex, int head, int tail, int token) {
+    return 0;
+}
+
+static int nfa_construct(struct lex * lex, char * s, int flag) {
+    lex->stack = lex->token;
+
+    lex->stack->head = 0;
+    lex->stack->tail = 0;
+    lex->stack->state = 1;
+
+    if(token_parse(lex, s))
+        return panic("invalid regular expression");
+
     return 0;
 }
