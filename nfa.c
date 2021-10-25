@@ -11,6 +11,27 @@ enum {
     X7C
 };
 
+static int shift[14][10] = {
+    { 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0  },
+    { 0 , 2 , 12, 13, 3 , 0 , 0 , 0 , 0 , 0  },
+    { 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0  },
+    { 0 , 2 , 4 , 0 , 3 , 0 , 0 , 0 , 0 , 0  },
+    { 0 , 6 , 0 , 0 , 0 , 5 , 7 , 8 , 9 , 10 },
+    { 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0  },
+    { 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0  },
+    { 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0  },
+    { 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0  },
+    { 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0  },
+    { 0 , 2 , 11, 0 , 3 , 0 , 0 , 0 , 0 , 0  },
+    { 0 , 6 , 0 , 0 , 0 , 0 , 7 , 8 , 9 , 0  },
+    { 0 , 6 , 0 , 0 , 0 , 0 , 7 , 8 , 9 , 10 },
+    { 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0  }
+};
+
+static int reduce[14] = {
+    0, 0, 2, 0, 0, 3, 4, 5, 6, 7, 0, 8, 1, 0
+};
+
 static int node_push(struct lex *, int *);
 static int edge_push(struct lex *, int, int);
 static int span_push(struct lex *, int, int, int, int);
@@ -226,6 +247,87 @@ loop:
 }
 
 static int token_shift(struct lex * lex, int head, int tail, int token) {
+    int state;
+
+    state = shift[lex->stack->state][token];
+    if(state) {
+        lex->stack++;
+
+        if(lex->stack >= lex->bound)
+            return panic("out of memory");
+
+        lex->stack->head = head;
+        lex->stack->tail = tail;
+        lex->stack->state = state;
+    } else {
+        switch(reduce[lex->stack->state]) {
+            case 1: /* E : e */
+                lex->stack -= 1;
+
+                if(token_shift(lex, 0, 0, FIN))
+                    return panic("invalid syntax");
+
+                if(token == NUL)
+                    return 0;
+
+                break;
+            case 2: /* e : v */
+                lex->stack -= 1;
+
+                if(token_shift(lex, 0, 0, EXP))
+                    return panic("invalid syntax");
+
+                break;
+            case 3: /* e : ( e ) */
+                lex->stack -= 3;
+
+                if(token_shift(lex, 0, 0, EXP))
+                    return panic("invalid syntax");
+
+                break;
+            case 4: /* e : e v */
+                lex->stack -= 2;
+
+                if(token_shift(lex, 0, 0, EXP))
+                    return panic("invalid syntax");
+
+                break;
+            case 5: /* e : e * */
+                lex->stack -= 2;
+
+                if(token_shift(lex, 0, 0, EXP))
+                    return panic("invalid syntax");
+
+                break;
+            case 6: /* e : e + */
+                lex->stack -= 2;
+
+                if(token_shift(lex, 0, 0, EXP))
+                    return panic("invalid syntax");
+
+                break;
+            case 7: /* e : e ? */
+                lex->stack -= 2;
+
+                if(token_shift(lex, 0, 0, EXP))
+                    return panic("invalid syntax");
+
+                break;
+            case 8: /* e : e | e */
+                lex->stack -= 3;
+
+                if(token_shift(lex, 0, 0, EXP))
+                    return panic("invalid syntax");
+
+                break;
+            default:
+                return panic("invalid syntax");
+        }
+
+        if(token_shift(lex, head, tail, token))
+            return panic("invalid syntax");
+    }
+
     return 0;
 }
 
