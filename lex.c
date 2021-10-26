@@ -59,3 +59,13 @@ void lex_delete(struct lex * lex) {
     free(lex->edge);
     free(lex->node);
 }
+
+void lex_clear(struct lex * lex) {
+    lex->root = 0;
+    lex->node_part = 1;
+    lex->node_next = 1;
+    lex->edge_part = 1;
+    lex->edge_next = 1;
+    lex->span_part = 1;
+    lex->span_next = 1;
+}
