@@ -249,6 +249,9 @@ loop:
 static int token_shift(struct lex * lex, int head, int tail, int token) {
     int state;
 
+    struct token * l;
+    struct token * r;
+
     state = shift[lex->stack->state][token];
     if(state) {
         lex->stack++;
@@ -264,7 +267,9 @@ static int token_shift(struct lex * lex, int head, int tail, int token) {
             case 1: /* E : e */
                 lex->stack -= 1;
 
-                if(token_shift(lex, 0, 0, FIN))
+                l = lex->stack + 1;
+
+                if(token_shift(lex, l->head, l->tail, FIN))
                     return panic("invalid syntax");
 
                 if(token == NUL)
@@ -274,49 +279,101 @@ static int token_shift(struct lex * lex, int head, int tail, int token) {
             case 2: /* e : v */
                 lex->stack -= 1;
 
-                if(token_shift(lex, 0, 0, EXP))
+                l = lex->stack + 1;
+
+                if(token_shift(lex, l->head, l->tail, EXP))
                     return panic("invalid syntax");
 
                 break;
             case 3: /* e : ( e ) */
                 lex->stack -= 3;
 
-                if(token_shift(lex, 0, 0, EXP))
+                l = lex->stack + 2;
+
+                if(token_shift(lex, l->head, l->tail, EXP))
                     return panic("invalid syntax");
 
                 break;
             case 4: /* e : e v */
                 lex->stack -= 2;
 
-                if(token_shift(lex, 0, 0, EXP))
+                l = lex->stack + 1;
+                r = lex->stack + 2;
+
+                node_cat(lex, l->tail, r->head);
+
+                if(token_shift(lex, l->head, r->tail, EXP))
                     return panic("invalid syntax");
 
                 break;
             case 5: /* e : e * */
                 lex->stack -= 2;
 
-                if(token_shift(lex, 0, 0, EXP))
+                l = lex->stack + 1;
+                r = lex->stack + 2;
+
+                if( node_push(lex, &r->head) ||
+                    node_push(lex, &r->tail) )
+                    return panic("failed to push node");
+
+                if( edge_push(lex, l->tail, l->head) ||
+                    edge_push(lex, r->head, l->head) ||
+                    edge_push(lex, l->tail, r->tail) ||
+                    edge_push(lex, r->head, r->tail) )
+                    return panic("failed to push edge");
+
+                if(token_shift(lex, r->head, r->tail, EXP))
                     return panic("invalid syntax");
 
                 break;
             case 6: /* e : e + */
                 lex->stack -= 2;
 
-                if(token_shift(lex, 0, 0, EXP))
+                l = lex->stack + 1;
+                r = lex->stack + 2;
+
+                if( node_push(lex, &r->head) ||
+                    node_push(lex, &r->tail) )
+                    return panic("failed to push node");
+
+                if( edge_push(lex, l->tail, l->head) ||
+                    edge_push(lex, r->head, l->head) ||
+                    edge_push(lex, l->tail, r->tail) )
+                    return panic("failed to push edge");
+
+                if(token_shift(lex, r->head, r->tail, EXP))
                     return panic("invalid syntax");
 
                 break;
             case 7: /* e : e ? */
                 lex->stack -= 2;
 
-                if(token_shift(lex, 0, 0, EXP))
+                l = lex->stack + 1;
+                r = lex->stack + 2;
+
+                if( node_push(lex, &r->head) ||
+                    node_push(lex, &r->tail) )
+                    return panic("failed to push node");
+
+                if( edge_push(lex, r->head, l->head) ||
+                    edge_push(lex, l->tail, r->tail) ||
+                    edge_push(lex, r->head, r->tail) )
+                    return panic("failed to push edge");
+
+                if(token_shift(lex, r->head, r->tail, EXP))
                     return panic("invalid syntax");
 
                 break;
             case 8: /* e : e | e */
                 lex->stack -= 3;
 
-                if(token_shift(lex, 0, 0, EXP))
+                l = lex->stack + 1;
+                r = lex->stack + 3;
+
+                node_sub(lex, r->tail, l->tail);
+                node_cat(lex, l->head, r->head);
+
+                if(token_shift(lex, l->head, l->tail, EXP))
                     return panic("invalid syntax");
 
                 break;
