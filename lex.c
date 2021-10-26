@@ -69,3 +69,14 @@ void lex_clear(struct lex * lex) {
     lex->span_part = 1;
     lex->span_next = 1;
 }
+
+int lex_compile(struct lex * lex, char * s, int flag) {
+    lex->node_part = lex->node_next;
+    lex->edge_part = lex->edge_next;
+    lex->span_part = lex->span_next;
+
+    if(nfa_construct(lex, s, flag))
+        return panic("failed to construct nfa");
+
+    return 0;
+}

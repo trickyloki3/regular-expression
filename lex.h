@@ -47,5 +47,6 @@ struct lex {
 int lex_create(struct lex *, int, int, int, int);
 void lex_delete(struct lex *);
 void lex_clear(struct lex *);
+int lex_compile(struct lex *, char *, int);
 
 #endif
