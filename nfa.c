@@ -398,6 +398,13 @@ static int nfa_construct(struct lex * lex, char * s, int flag) {
     if(token_parse(lex, s))
         return panic("invalid regular expression");
 
+    if(lex->root) {
+        if(edge_push(lex, lex->root, lex->stack->head))
+            return panic("failed to push edge");
+    } else {
+        lex->root = lex->stack->head;
+    }
+
     lex->node[lex->stack->tail].flag = flag;
 
     return 0;

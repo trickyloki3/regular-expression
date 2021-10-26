@@ -26,6 +26,7 @@ struct token {
 };
 
 struct lex {
+    int root;
     struct node * node;
     int node_part;
     int node_next;

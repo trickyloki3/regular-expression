@@ -9,6 +9,8 @@
 #include "nfa.c"
 
 int lex_create(struct lex * lex, int node_size, int edge_size, int span_size, int token_size) {
+    lex->root = 0;
+
     lex->node = malloc(node_size * sizeof(*lex->node));
     if(lex->node == NULL)
         goto node_fail;
