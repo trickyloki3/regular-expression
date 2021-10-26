@@ -398,5 +398,7 @@ static int nfa_construct(struct lex * lex, char * s, int flag) {
     if(token_parse(lex, s))
         return panic("invalid regular expression");
 
+    lex->node[lex->stack->tail].flag = flag;
+
     return 0;
 }
