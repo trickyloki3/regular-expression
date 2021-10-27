@@ -8,7 +8,7 @@
 
 #include "nfa.c"
 
-int lex_create(struct lex * lex, int node_size, int edge_size, int span_size, int token_size, int key_size) {
+int lex_create(struct lex * lex, int node_size, int edge_size, int span_size, int token_size, int key_size, int set_size) {
     lex->root = 0;
 
     lex->node = malloc(node_size * sizeof(*lex->node));
@@ -50,8 +50,18 @@ int lex_create(struct lex * lex, int node_size, int edge_size, int span_size, in
     lex->key_prev = key_size;
     lex->key_size = key_size;
 
+    lex->set = malloc(set_size * sizeof(*lex->set));
+    if(lex->set == NULL)
+        goto set_fail;
+
+    lex->set_next = 0;
+    lex->set_prev = set_size;
+    lex->set_size = set_size;
+
     return 0;
 
+set_fail:
+    free(lex->key);
 key_fail:
     free(lex->token);
 token_fail:
@@ -65,6 +75,7 @@ node_fail:
 }
 
 void lex_delete(struct lex * lex) {
+    free(lex->set);
     free(lex->key);
     free(lex->token);
     free(lex->span);
@@ -83,6 +94,8 @@ void lex_clear(struct lex * lex) {
     lex->key_part = 0;
     lex->key_next = 0;
     lex->key_prev = lex->key_size;
+    lex->set_next = 0;
+    lex->set_prev = lex->set_size;
 }
 
 int lex_compile(struct lex * lex, char * s, int flag) {

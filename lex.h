@@ -25,6 +25,12 @@ struct token {
     int state;
 };
 
+struct set {
+    int part;
+    int next;
+    int node;
+};
+
 struct lex {
     int root;
     struct node * node;
@@ -47,9 +53,13 @@ struct lex {
     int key_next;
     int key_prev;
     int key_size;
+    struct set * set;
+    int set_next;
+    int set_prev;
+    int set_size;
 };
 
-int lex_create(struct lex *, int, int, int, int, int);
+int lex_create(struct lex *, int, int, int, int, int, int);
 void lex_delete(struct lex *);
 void lex_clear(struct lex *);
 int lex_compile(struct lex *, char *, int);
