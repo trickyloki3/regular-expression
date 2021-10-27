@@ -3,6 +3,11 @@ static int set_join(struct lex *, int);
 static int set_compare(int *, int, int, int, int);
 static int set_closure(struct lex *, int *);
 
+static void line_sort(struct line *, int);
+
+static int line_push(struct lex *, int, int, int);
+static int line_join(struct lex *, int, int);
+
 static int set_push(struct lex * lex, int node) {
     int l;
     int r;
@@ -117,6 +122,90 @@ static int set_closure(struct lex * lex, int * node) {
     /* commit the key */
     lex->key_part = lex->key_next;
     *node = lex->set[l].node;
+
+    return 0;
+}
+
+static void line_sort(struct line * l, int n) {
+    int r;
+    int p;
+    int c;
+
+    struct line line;
+
+    for(r = n / 2 - 1; r >= 0; r--) {
+        p = r;
+        c = p * 2 + 1;
+        while(c < n) {
+            if(c + 1 < n && l[c].a < l[c + 1].a)
+                c++;
+
+            if(l[p].a > l[c].a)
+                break;
+
+            line = l[c];
+            l[c] = l[p];
+            l[p] = line;
+
+            p = c;
+            c = p * 2 + 1;
+        }
+    }
+
+    for(r = n - 1; r > 0; r--) {
+        line = l[0];
+        l[0] = l[r];
+        l[r] = line;
+
+        p = 0;
+        c = p * 2 + 1;
+        while(c < r) {
+            if(c + 1 < r && l[c].a < l[c + 1].a)
+                c++;
+
+            if(l[p].a > l[c].a)
+                break;
+
+            line = l[c];
+            l[c] = l[p];
+            l[p] = line;
+
+            p = c;
+            c = p * 2 + 1;
+        }
+    }
+}
+
+static int line_push(struct lex * lex, int a, int b, int node) {
+    int i;
+
+    if(lex->line_next >= lex->line_size)
+        return panic("out of memory");
+
+    i = lex->line_next++;
+
+    lex->line[i].a = a;
+    lex->line[i].b = b;
+    lex->line[i].node = node;
+
+    return 0;
+}
+
+static int line_join(struct lex * lex, int key_part, int key_next) {
+    int n;
+    int s;
+
+    lex->line_next = 0;
+
+    while(key_part < key_next) {
+        n = lex->key[key_part++];
+        s = lex->node[n].span;
+        while(s) {
+            if(line_push(lex, lex->span[s].a, lex->span[s].b, lex->span[s].node))
+                return panic("failed to push line");
+            s = lex->span[s].next;
+        }
+    }
 
     return 0;
 }
