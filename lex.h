@@ -42,9 +42,14 @@ struct lex {
     struct token * token;
     struct token * bound;
     struct token * stack;
+    int * key;
+    int key_part;
+    int key_next;
+    int key_prev;
+    int key_size;
 };
 
-int lex_create(struct lex *, int, int, int, int);
+int lex_create(struct lex *, int, int, int, int, int);
 void lex_delete(struct lex *);
 void lex_clear(struct lex *);
 int lex_compile(struct lex *, char *, int);
