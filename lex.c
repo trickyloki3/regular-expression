@@ -1,12 +1,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
+#include <string.h>
 
 #include "panic.c"
 
 #include "lex.h"
 
 #include "nfa.c"
+#include "dfa.c"
 
 int lex_create(struct lex * lex, int node_size, int edge_size, int span_size, int token_size, int key_size, int set_size) {
     lex->root = 0;
