@@ -31,6 +31,12 @@ struct set {
     int node;
 };
 
+struct line {
+    int a;
+    int b;
+    int node;
+};
+
 struct lex {
     int root;
     struct node * node;
@@ -57,9 +63,12 @@ struct lex {
     int set_next;
     int set_prev;
     int set_size;
+    struct line * line;
+    int line_next;
+    int line_size;
 };
 
-int lex_create(struct lex *, int, int, int, int, int, int);
+int lex_create(struct lex *, int, int, int, int, int, int, int);
 void lex_delete(struct lex *);
 void lex_clear(struct lex *);
 int lex_compile(struct lex *, char *, int);

@@ -10,7 +10,7 @@
 #include "nfa.c"
 #include "dfa.c"
 
-int lex_create(struct lex * lex, int node_size, int edge_size, int span_size, int token_size, int key_size, int set_size) {
+int lex_create(struct lex * lex, int node_size, int edge_size, int span_size, int token_size, int key_size, int set_size, int line_size) {
     lex->root = 0;
 
     lex->node = malloc(node_size * sizeof(*lex->node));
@@ -60,8 +60,17 @@ int lex_create(struct lex * lex, int node_size, int edge_size, int span_size, in
     lex->set_prev = set_size;
     lex->set_size = set_size;
 
+    lex->line = malloc(line_size * sizeof(*lex->line));
+    if(lex->line == NULL)
+        goto line_fail;
+
+    lex->line_next = 0;
+    lex->line_size = line_size;
+
     return 0;
 
+line_fail:
+    free(lex->set);
 set_fail:
     free(lex->key);
 key_fail:
@@ -77,6 +86,7 @@ node_fail:
 }
 
 void lex_delete(struct lex * lex) {
+    free(lex->line);
     free(lex->set);
     free(lex->key);
     free(lex->token);
