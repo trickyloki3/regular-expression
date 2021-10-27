@@ -26,8 +26,8 @@ struct token {
 };
 
 struct set {
-    int part;
-    int next;
+    int key_part;
+    int key_next;
     int node;
 };
 
